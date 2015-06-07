@@ -1,0 +1,35 @@
+<style>
+    .center-row {
+        display: flex;
+        justify-content: center;
+    }
+
+    .center-col {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-content: space-between;
+    }
+</style>
+
+<div class="center-row">
+    <h1>Tic Tac Toe</h1>
+
+    <p>{{messages}}</p>
+</div>
+
+<div class="center-row" ng-hide="choice">
+    <button ng-click="choice='new'">New Game</button>
+    <button ng-click="choice='join'">Join Game</button>
+</div>
+
+<div ng-show="choice">
+    <form ng-submit="send(name, gameId, choice)" class="center-col">
+        <input type="text" ng-model="name" placeholder="Enter your name">
+        <p ng-if="choice=='new'">
+            (Optional) You may enter a desired game ID to make it easier to remember.
+        </p>
+        <input type="text" ng-model="gameId" placeholder="Game ID">
+        <input type="submit" value="Submit">
+    </form>
+</div>

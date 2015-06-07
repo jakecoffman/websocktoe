@@ -1,0 +1,87 @@
+<style>
+    @import url(http://fonts.googleapis.com/css?family=Permanent+Marker);
+    html,
+    body {
+        height: 100%;
+    }
+    #container {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+    .messages {
+        display: flex;
+        height: 100px;
+    }
+    .tictactoe {
+        height: 300px;
+        width: 300px;
+        padding: 12px;
+        background: rgba(0, 0, 0, 0.2);
+        box-sizing: border-box;
+        border-radius: 30px;
+        font-family: Permanent Marker, sans-serif;
+        font-size: 80px;
+        color: rgba(0, 0, 0, 0.6);
+    }
+    .tictactoe {
+        display: flex;
+        flex-direction: column;
+    }
+    .tictactoe .row {
+        flex: 1;
+        display: flex;
+    }
+    .tictactoe .row .cell {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .tictactoe .row {
+        border-top: 3px solid rgba(0, 0, 0, 0.6);
+        border-bottom: 3px solid rgba(0, 0, 0, 0.6);
+    }
+    .tictactoe .row:first-child {
+        border-top: none;
+    }
+    .tictactoe .row:last-child {
+        border-bottom: none;
+    }
+    .tictactoe .row .cell {
+        border-left: 3px solid rgba(0, 0, 0, 0.6);
+        border-right: 3px solid rgba(0, 0, 0, 0.6);
+    }
+    .tictactoe .row .cell:first-child {
+        border-left: none;
+    }
+    .tictactoe .row .cell:last-child {
+        border-right: none;
+    }
+</style>
+<div class="messages">
+    <p>{{message}}</p>
+</div>
+<div class="tictactoe">
+    <div class="row">
+        <div class="cell" on-tap="set:cell0">{{cell0}}</div>
+        <div class="cell" on-tap="set:cell1">{{cell1}}</div>
+        <div class="cell" on-tap="set:cell2">{{cell2}}</div>
+    </div>
+    <div class="row">
+        <div class="cell" on-tap="set:cell3">{{cell3}}</div>
+        <div class="cell" on-tap="set:cell4">{{cell4}}</div>
+        <div class="cell" on-tap="set:cell5">{{cell5}}</div>
+    </div>
+    <div class="row">
+        <div class="cell" on-tap="set:cell6">{{cell6}}</div>
+        <div class="cell" on-tap="set:cell7">{{cell7}}</div>
+        <div class="cell" on-tap="set:cell8">{{cell8}}</div>
+    </div>
+</div>
+<div class="messages">
+    <button>Resign</button>
+    <button>End game</button>
+</div>
