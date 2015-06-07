@@ -1,0 +1,22 @@
+.center-row {
+    display: flex;
+    justify-content: center;
+}
+
+.center-col {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-content: space-between;
+}
+
+.btn {
+    background: #999;
+    padding: 1em 2.4em;
+    font-size: .9em;
+    margin: 1em;
+    color: white;
+    text-decoration: none;
+    flex-grow: 1;
+    text-align: center;
+}
