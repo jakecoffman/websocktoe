@@ -8,6 +8,6 @@ import (
 
 func main() {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
-	mux := websocktoe.New()
+	mux := websocktoe.NewServer()
 	log.Fatal(http.ListenAndServe("localhost:3030", mux))
 }

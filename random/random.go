@@ -3,6 +3,7 @@ package random
 import (
 	"math/rand"
 	"time"
+	"strconv"
 )
 
 func init() {
@@ -25,5 +26,5 @@ func GameId() string {
 // PlayerId returns a new random Player ID
 func PlayerId() string {
 	// TODO: UUID?
-	return string(rand.Int())
+	return strconv.Itoa(rand.Int())
 }
