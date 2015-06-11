@@ -6,6 +6,8 @@ import (
 	"net/http/pprof"
 
 	"github.com/gorilla/websocket"
+	"errors"
+	"fmt"
 )
 
 func NewServer() *http.ServeMux {
@@ -24,7 +26,6 @@ func NewServer() *http.ServeMux {
 	}
 
 	// On server startup, create a new empty set of games
-	// TODO: Persistance
 	games := NewGames()
 	// all connections for broadcasting
 	connections := map[*websocket.Conn]struct {}{}
@@ -43,54 +44,77 @@ func NewServer() *http.ServeMux {
 		connections[conn] = struct {}{}
 		log.Println("Connections", len(connections))
 		player := NewPlayer(conn)
-		Loop(player, games)
+		log.Println(Loop(player, games))
 	})
 
 	return mux
 }
 
-func Loop(player *Player, games *Games) {
-	data := map[string]string{}
-	err := player.ReadJSON(&data)
-	if err != nil {
-		log.Println(err)
-		return
+const (
+	LOBBY_NEW = "NEW"
+	LOBBY_JOIN = "JOIN"
+)
+
+func Loop(player *Player, games *Games) error {
+	var cmd *LobbyCommand
+	for {
+		cmd = &LobbyCommand{}
+		err := player.ReadJSON(cmd)
+		if err != nil {
+			return err
+		}
+		if cmd.Valid() {
+			break
+		} else {
+			log.Println("Invalid command:", cmd)
+		}
 	}
 
-	player.Name = data["name"]
+	player.Name = cmd.Name
 
 	var game *Game
-	switch data["action"] {
-	case "NEW":
+	switch cmd.Action {
+	case LOBBY_NEW:
 		game = games.NewGame(player)
-	case "JOIN":
-		game = games.Find(data["gameId"])
+	case LOBBY_JOIN:
+		game = games.Find(cmd.GameId)
 		if game == nil {
-			log.Println("Game not found")
-			return
+			return errors.New("Game not found")
 		}
 		ok := game.Join(player)
 		if !ok {
-			log.Println("error connecting")
-			return
+			return errors.New("error connecting")
 		}
 	default:
-		log.Println(data["action"])
-		return
+		return errors.New(fmt.Sprintln("Unknown action, programmer error?", cmd.Action))
 	}
-	defer game.Leave(player)
-
-	for {
+	defer func(){
+		game.Leave(player)
+		log.Println(player.Name, "disconnected")
 		game.Update()
+	}()
 
-		// listen for messages from the player
-		data := map[string]interface{}{}
-		err := player.ReadJSON(&data)
+	game.Update()
+	for {
+		cmd := &GameCommand{}
+		err := player.ReadJSON(cmd)
 		if err != nil {
-			log.Println(err)
-			return
+			return err
+		}
+		if !cmd.Valid() {
+			log.Println("Invalid command", cmd)
+			continue
+		}
+		// TODO: add/check for leave command here
+		if game.Over {
+			log.Println("Game is over")
+			continue
+		}
+		if !game.Move(player, cmd.X, cmd.Y) {
+			log.Println("Invalid move")
+			continue
 		}
 
-		// TODO: Handle commands here
+		game.Update()
 	}
 }

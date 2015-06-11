@@ -3,10 +3,13 @@
 angular.module('game', [
     'ngRoute',
     'game.setup',
-    'game.game'
+    'game.play'
 ])
     .config(['$routeProvider', function($routeProvider) {
         $routeProvider.otherwise({redirectTo: '/setup'})
+    }])
+    .run(['$location', function($location){
+        $location.path("/");
     }])
     .factory('Game', ['$rootScope', '$location', function($rootScope, $location){
         var ws = new WebSocket('ws://' + $location.host() + ':' + $location.port() + '/ws');
@@ -33,7 +36,8 @@ angular.module('game', [
             $rootScope.$apply(function(){
                 var data = JSON.parse(e.data);
                 Game.state = data;
-                $location.path(data.view);
+                console.log(data);
+                $location.path(data.view.toLowerCase());
             });
         };
 

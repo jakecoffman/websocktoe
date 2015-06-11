@@ -15,9 +15,8 @@ angular.module('game.setup', ['ngRoute'])
             var msg = {
                 name: name,
                 gameId: gameId,
-                choice: choice
+                action: choice
             };
-            console.log("Attempting to send", msg);
             Game.send(msg);
         }
     }]);

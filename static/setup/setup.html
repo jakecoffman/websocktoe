@@ -5,14 +5,14 @@
 </div>
 
 <div class="center-row" ng-hide="choice">
-    <a class="btn" ng-click="choice='new'">New Game</a>
-    <a class="btn" ng-click="choice='join'">Join Game</a>
+    <a class="btn" ng-click="choice='NEW'">New Game</a>
+    <a class="btn" ng-click="choice='JOIN'">Join Game</a>
 </div>
 
 <div ng-show="choice">
     <form ng-submit="send(name, gameId, choice)" class="center-col">
         <input type="text" ng-model="name" placeholder="Enter your name">
-        <p ng-if="choice=='new'">
+        <p ng-if="choice=='NEW'">
             (Optional) You may enter a desired game ID to make it easier to remember.
         </p>
         <input type="text" ng-model="gameId" placeholder="Game ID">
