@@ -1,4 +1,4 @@
-package websocktoe
+package tictactoe
 
 type LobbyCommand struct {
 	Name   string `json:"name"`

@@ -1,4 +1,4 @@
-package websocktoe
+package tictactoe
 
 import "testing"
 

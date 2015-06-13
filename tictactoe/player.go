@@ -1,4 +1,4 @@
-package websocktoe
+package tictactoe
 
 import (
 	"github.com/gorilla/websocket"
@@ -7,8 +7,8 @@ import (
 )
 
 type Player struct {
-	r sync.RWMutex
-	w sync.RWMutex
+	r    sync.RWMutex
+	w    sync.RWMutex
 	id   string
 	Name string `json:"name"`
 	conn *websocket.Conn
