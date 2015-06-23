@@ -18,7 +18,7 @@ func NewConnections() *Connections {
 
 func (c *Connections) Add(conn *websocket.Conn) {
 	c.Lock()
-	defer c.Lock()
+	defer c.Unlock()
 	c.conns[conn] = none{}
 }
 
