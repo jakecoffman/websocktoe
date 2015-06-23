@@ -1,13 +1,15 @@
 package main
 
 import (
-	"log"
 	"github.com/jakecoffman/websocktoe"
+	"log"
 	"net/http"
 )
 
 func main() {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 	mux := websocktoe.NewServer()
-	log.Fatal(http.ListenAndServe("localhost:3030", mux))
+	hostport := "localhost:3030"
+	log.Println("Running on", hostport)
+	log.Fatal(http.ListenAndServe(hostport, mux))
 }

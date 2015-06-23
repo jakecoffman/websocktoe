@@ -19,31 +19,31 @@ func NewServer() *http.ServeMux {
 
 	mux.Handle("/", http.FileServer(http.Dir("static")))
 
-	upgrader := websocket.Upgrader{
-		ReadBufferSize:  1024,
-		WriteBufferSize: 1024,
-	}
-
-	// On server startup, create a new empty set of games
 	games := tictactoe.NewPitBoss()
-	// all connections for broadcasting
-	connections := map[*websocket.Conn]struct {}{}
+	connections := NewConnections()
 
-	mux.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
-		conn, err := upgrader.Upgrade(w, r, nil)
+	mux.HandleFunc("/ws", HandlerTicTacToe(games, connections))
+	return mux
+}
+
+func HandlerTicTacToe(games *tictactoe.PitBoss, conns *Connections) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		up := websocket.Upgrader{
+			ReadBufferSize:  1024,
+			WriteBufferSize: 1024,
+		}
+		conn, err := up.Upgrade(w, r, nil)
 		if err != nil {
 			log.Println(err)
 			return
 		}
 		defer func() {
 			conn.Close()
-			delete(connections, conn)
-			log.Println("Connections", len(connections))
+			conns.Delete(conn)
+			log.Println("Connections", conns.Size())
 		}()
-		connections[conn] = struct {}{}
-		log.Println("Connections", len(connections))
+		conns.Add(conn)
+		log.Println("Connections", conns.Size())
 		log.Println(tictactoe.Loop(conn, games))
-	})
-
-	return mux
+	}
 }

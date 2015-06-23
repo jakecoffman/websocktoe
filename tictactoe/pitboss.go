@@ -19,13 +19,11 @@ func (g *PitBoss) NewGame(player *Player) *Game {
 	g.Lock()
 	defer g.Unlock()
 	game := &Game{
-		Id: random.GameId(),
-		View: VIEW_PLAY,
+		Id:      random.GameId(),
+		View:    VIEW_PLAY,
 		Players: map[string]*Player{player.id: player},
-		Board: [3][3]string{},
-		LastMove: "",
-		Winner: "",
-		Over: false,
+		Board:   [3][3]string{},
+		Over:    false,
 	}
 	game.Board[0] = [3]string{}
 	game.Board[1] = [3]string{}
