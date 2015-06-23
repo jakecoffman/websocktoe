@@ -1,14 +1,14 @@
 package tictactoe
 
 import (
-	"log"
-	"fmt"
 	"errors"
+	"fmt"
 	"github.com/gorilla/websocket"
+	"log"
 )
 
 const (
-	LOBBY_NEW = "NEW"
+	LOBBY_NEW  = "NEW"
 	LOBBY_JOIN = "JOIN"
 )
 
@@ -46,7 +46,7 @@ func Loop(conn *websocket.Conn, pitboss *PitBoss) error {
 	default:
 		return errors.New(fmt.Sprintln("Unknown action, programmer error?", cmd.Action))
 	}
-	defer func(){
+	defer func() {
 		game.Leave(player)
 		log.Println(player.Name, "disconnected")
 		game.Update()
@@ -70,6 +70,10 @@ func Loop(conn *websocket.Conn, pitboss *PitBoss) error {
 		}
 		if !game.Move(player, cmd.X, cmd.Y) {
 			log.Println("Invalid move")
+			player.WriteJSON(struct {
+				Type    string `json:"type"`
+				Message string `json:"message"`
+			}{"message", "Invalid move"})
 			continue
 		}
 

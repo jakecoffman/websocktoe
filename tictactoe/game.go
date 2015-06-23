@@ -1,25 +1,25 @@
 package tictactoe
 
 import (
-	"sync"
 	"log"
+	"sync"
 )
 
 const (
 	VIEW_SETUP = "SETUP"
-	VIEW_PLAY = "PLAY"
+	VIEW_PLAY  = "PLAY"
 )
 
 type Game struct {
 	sync.RWMutex
-	Id       string `json:"id"`
-	View     string `json:"view"`
+	Id       string             `json:"id"`
+	View     string             `json:"view"`
 	Players  map[string]*Player `json:"players"`
-	Board    [3][3]string `json:"board"`
-	LastMove string `json:"lastmove"` // name of the player that made the last move
-	Winner   string `json:"winner"`
-	Over     bool `json:"over"`
-	Moves    int `json:"moves"`
+	Board    [3][3]string       `json:"board"`
+	LastMove string             `json:"lastmove"` // name of the player that made the last move
+	Winner   string             `json:"winner"`
+	Over     bool               `json:"over"`
+	Moves    int                `json:"moves"`
 }
 
 func (g *Game) Join(player *Player) bool {
@@ -65,7 +65,7 @@ func (g *Game) Move(player *Player, x, y int) bool {
 }
 
 func winner(board [3][3]string, x, y int, name string) string {
-	for i := 0; i<3; i++ {
+	for i := 0; i < 3; i++ {
 		if board[x][i] != name {
 			break
 		}
@@ -74,7 +74,7 @@ func winner(board [3][3]string, x, y int, name string) string {
 		}
 	}
 
-	for i := 0; i<3; i++ {
+	for i := 0; i < 3; i++ {
 		if board[i][y] != name {
 			break
 		}
@@ -83,7 +83,7 @@ func winner(board [3][3]string, x, y int, name string) string {
 		}
 	}
 
-	for i := 0; i<3; i++ {
+	for i := 0; i < 3; i++ {
 		if board[i][i] != name {
 			break
 		}
@@ -92,7 +92,7 @@ func winner(board [3][3]string, x, y int, name string) string {
 		}
 	}
 
-	for i := 0; i<3; i++ {
+	for i := 0; i < 3; i++ {
 		if board[i][2-i] != name {
 			break
 		}
@@ -110,7 +110,10 @@ func (g *Game) Update() {
 	//	js, _ := json.MarshalIndent(g, "", "    ")
 	//	log.Printf("UPDATE %v", string(js))
 	for _, player := range g.Players {
-		err := player.WriteJSON(g)
+		err := player.WriteJSON(struct {
+			Type string `json:"type"`
+			*Game
+		}{Type: "state", Game: g})
 		if err != nil {
 			log.Println(err)
 		}

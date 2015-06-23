@@ -7,9 +7,15 @@
     <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.3.16/angular.min.js"></script>
     <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.3.16/angular-route.min.js"></script>
 </head>
-<body ng-app="game">
+<body ng-app="game" ng-controller="RootCtrl">
 
 <div ng-view></div>
+
+<ul>
+    <li ng-repeat="m in game.messages track by $index">
+        {{m}}
+    </li>
+</ul>
 
 <script src="app.js"></script>
 <script src="setup/setup.js"></script>
