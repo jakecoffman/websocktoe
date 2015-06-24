@@ -42,6 +42,14 @@ func (g *Game) Leave(player *Player) {
 	delete(g.Players, player.id)
 }
 
+func (g *Game) Broadcast(message string) {
+	g.RLock()
+	defer g.RUnlock()
+	for _, p := range g.Players {
+		_ = p.Say(message)
+	}
+}
+
 func (g *Game) Move(player *Player, x, y int) bool {
 	g.Lock()
 	defer g.Unlock()

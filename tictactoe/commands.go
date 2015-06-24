@@ -20,11 +20,16 @@ func (cmd *LobbyCommand) Valid() bool {
 }
 
 type GameCommand struct {
-	X int `json:"x"`
-	Y int `json:"y"`
+	X     int `json:"x"`
+	Y     int `json:"y"`
+	Leave bool `json:"leave"`
 }
 
 func (cmd *GameCommand) Valid() bool {
+	if cmd.Leave == true {
+		return true
+	}
+
 	if cmd.X < 0 || cmd.X > 3 {
 		return false
 	}

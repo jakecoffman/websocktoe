@@ -18,6 +18,19 @@ func NewPlayer(conn *websocket.Conn) *Player {
 	return &Player{id: random.PlayerId(), Name: "", conn: conn}
 }
 
+type PlayerMessage struct {
+	Type    string `json:"type"`
+	Message string `json:"message"`
+}
+
+func (p *Player) Say(message string) error {
+	p.r.Lock()
+	defer p.r.Unlock()
+	err := p.conn.WriteJSON(PlayerMessage{"message", message})
+	return err
+}
+
+// deprecated?
 func (p *Player) ReadJSON(v interface{}) error {
 	p.r.Lock()
 	defer p.r.Unlock()
@@ -25,6 +38,7 @@ func (p *Player) ReadJSON(v interface{}) error {
 	return err
 }
 
+// deprecated?
 func (p *Player) WriteJSON(v interface{}) error {
 	p.w.Lock()
 	defer p.w.Unlock()
