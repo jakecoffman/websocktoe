@@ -1,12 +1,12 @@
 package tictactoe
 
-type LobbyCommand struct {
+type LobbyCmd struct {
 	Name   string `json:"name"`
 	Action string `json:"action"`
 	GameId string `json:"gameId"`
 }
 
-func (cmd *LobbyCommand) Valid() bool {
+func (cmd *LobbyCmd) Valid() bool {
 	if cmd.Name == "" {
 		return false
 	}
@@ -19,13 +19,13 @@ func (cmd *LobbyCommand) Valid() bool {
 	return false
 }
 
-type GameCommand struct {
+type GameCmd struct {
 	X     int `json:"x"`
 	Y     int `json:"y"`
 	Leave bool `json:"leave"`
 }
 
-func (cmd *GameCommand) Valid() bool {
+func (cmd *GameCmd) Valid() bool {
 	if cmd.Leave == true {
 		return true
 	}

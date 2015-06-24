@@ -11,11 +11,9 @@ const (
 )
 
 func lobbyLoop(player *Player, pitboss *PitBoss) (*Game, error) {
-	var lobbyCmd *LobbyCommand
 	var game *Game
 	for {
-		lobbyCmd = &LobbyCommand{}
-		err := player.ReadJSON(lobbyCmd)
+		lobbyCmd, err := player.ReadLobbyCmd()
 		if err != nil {
 			return nil, err
 		}
@@ -51,10 +49,8 @@ func lobbyLoop(player *Player, pitboss *PitBoss) (*Game, error) {
 }
 
 func gameLoop(player *Player, game *Game) error {
-	var gameCmd *GameCommand
 	for {
-		gameCmd = &GameCommand{}
-		err := player.ReadJSON(gameCmd)
+		gameCmd, err := player.ReadGameCmd()
 		if err != nil {
 			return err
 		}

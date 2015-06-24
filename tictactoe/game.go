@@ -115,13 +115,8 @@ func winner(board [3][3]string, x, y int, name string) string {
 func (g *Game) Update() {
 	g.RLock()
 	defer g.RUnlock()
-	//	js, _ := json.MarshalIndent(g, "", "    ")
-	//	log.Printf("UPDATE %v", string(js))
 	for _, player := range g.Players {
-		err := player.WriteJSON(struct {
-			Type string `json:"type"`
-			*Game
-		}{Type: "state", Game: g})
+		err := player.WriteGame(g)
 		if err != nil {
 			log.Println(err)
 		}

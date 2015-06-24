@@ -7,8 +7,8 @@ import (
 )
 
 type Player struct {
-	r    sync.RWMutex
-	w    sync.RWMutex
+	r    sync.Mutex
+	w    sync.Mutex
 	id   string
 	Name string `json:"name"`
 	conn *websocket.Conn
@@ -30,17 +30,27 @@ func (p *Player) Say(message string) error {
 	return err
 }
 
-// deprecated?
-func (p *Player) ReadJSON(v interface{}) error {
+func (p *Player) ReadLobbyCmd() (*LobbyCmd, error) {
 	p.r.Lock()
 	defer p.r.Unlock()
-	err := p.conn.ReadJSON(&v)
-	return err
+	lobbyCmd := &LobbyCmd{}
+	err := p.conn.ReadJSON(lobbyCmd)
+	return lobbyCmd, err
 }
 
-// deprecated?
-func (p *Player) WriteJSON(v interface{}) error {
+func (p *Player) ReadGameCmd() (*GameCmd, error) {
+	p.r.Lock()
+	defer p.r.Unlock()
+	gameCmd := &GameCmd{}
+	err := p.conn.ReadJSON(gameCmd)
+	return gameCmd, err
+}
+
+func (p *Player) WriteGame(game *Game) error {
 	p.w.Lock()
 	defer p.w.Unlock()
-	return p.conn.WriteJSON(v)
+	return p.conn.WriteJSON(struct {
+		Type string `json:"type"`
+		*Game
+	}{Type: "state", Game: game})
 }
