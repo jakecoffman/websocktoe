@@ -92,5 +92,8 @@ func Loop(conn *websocket.Conn, pitboss *PitBoss) error {
 		if err != nil {
 			return err
 		}
+		game.Leave(player)
+		game.Broadcast(fmt.Sprintf("Player %v has left", player.Name))
+		game.Update()
 	}
 }

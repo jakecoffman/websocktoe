@@ -14,13 +14,15 @@ angular.module('game.play', ['ngRoute'])
         $scope.board = Game.state.board;
 
         $scope.move = function(x, y) {
-            Game.send({
-                x: x,
-                y: y
-            });
+            Game.send({x: x, y: y});
         };
 
         $scope.board = function(x, y) {
             return Game.state.board[x][y];
+        };
+
+        $scope.leave = function() {
+            Game.send({leave: true});
+            $location.path('/');
         };
     }]);

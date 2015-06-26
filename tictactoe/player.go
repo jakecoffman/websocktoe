@@ -24,8 +24,8 @@ type PlayerMessage struct {
 }
 
 func (p *Player) Say(message string) error {
-	p.r.Lock()
-	defer p.r.Unlock()
+	p.w.Lock()
+	defer p.w.Unlock()
 	err := p.conn.WriteJSON(PlayerMessage{"message", message})
 	return err
 }
