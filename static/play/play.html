@@ -25,39 +25,39 @@
         font-family: Permanent Marker, sans-serif;
         font-size: 80px;
         color: rgba(0, 0, 0, 0.6);
-    }
-    .tictactoe {
         display: flex;
         flex-direction: column;
     }
-    .tictactoe .row {
+    .tictactoe .r {
         flex: 1;
         display: flex;
     }
-    .tictactoe .row .cell {
+    .tictactoe .r .cell {
         flex: 1;
         display: flex;
         align-items: center;
         justify-content: center;
+        overflow: hidden;
     }
-    .tictactoe .row {
+    .tictactoe .r {
         border-top: 3px solid rgba(0, 0, 0, 0.6);
         border-bottom: 3px solid rgba(0, 0, 0, 0.6);
     }
-    .tictactoe .row:first-child {
+    .tictactoe .r:first-child {
         border-top: none;
     }
-    .tictactoe .row:last-child {
+    .tictactoe .r:last-child {
         border-bottom: none;
     }
-    .tictactoe .row .cell {
+    .tictactoe .r .cell {
         border-left: 3px solid rgba(0, 0, 0, 0.6);
         border-right: 3px solid rgba(0, 0, 0, 0.6);
+        overflow: hidden;
     }
-    .tictactoe .row .cell:first-child {
+    .tictactoe .r .cell:first-child {
         border-left: none;
     }
-    .tictactoe .row .cell:last-child {
+    .tictactoe .r .cell:last-child {
         border-right: none;
     }
 </style>
@@ -76,22 +76,22 @@
     </div>
 </div>
 <div class="tictactoe">
-    <div class="row">
+    <div class="r">
         <div class="cell" ng-click="move(0, 0)">{{board(0,0)}}</div>
         <div class="cell" ng-click="move(1, 0)">{{board(1,0)}}</div>
         <div class="cell" ng-click="move(2, 0)">{{board(2,0)}}</div>
     </div>
-    <div class="row">
+    <div class="r">
         <div class="cell" ng-click="move(0, 1)">{{board(0,1)}}</div>
         <div class="cell" ng-click="move(1, 1)">{{board(1,1)}}</div>
         <div class="cell" ng-click="move(2, 1)">{{board(2,1)}}</div>
     </div>
-    <div class="row">
+    <div class="r">
         <div class="cell" ng-click="move(0, 2)">{{board(0,2)}}</div>
         <div class="cell" ng-click="move(1, 2)">{{board(1,2)}}</div>
         <div class="cell" ng-click="move(2, 2)">{{board(2,2)}}</div>
     </div>
 </div>
-<div class="messages">
-    <button ng-click="leave()">Leave game</button>
+<div class="space-around">
+    <button ng-click="leave()" class="btn btn-primary btn-lg">Leave game</button>
 </div>

@@ -4,18 +4,22 @@
     <p>{{messages}}</p>
 </div>
 
-<div class="center-row" ng-hide="choice">
-    <a class="btn" ng-click="choice='NEW'">New Game</a>
-    <a class="btn" ng-click="choice='JOIN'">Join Game</a>
+<div class="space-around" ng-hide="choice">
+    <a class="btn btn-primary btn-lg" ng-click="choice='NEW'">New Game</a>
+    <a class="btn btn-primary btn-lg" ng-click="choice='JOIN'">Join Game</a>
 </div>
 
-<div ng-show="choice">
-    <form ng-submit="send(name, gameId, choice)" class="center-col">
-        <input type="text" ng-model="name" placeholder="Enter your name">
-        <p ng-if="choice=='NEW'">
-            (Optional) You may enter a desired game ID to make it easier to remember.
-        </p>
-        <input type="text" ng-model="gameId" placeholder="Game ID">
-        <input type="submit" value="Submit" class="btn">
+<div ng-show="choice" class="container">
+    <form ng-submit="send(name, gameId, choice)">
+        <div class="form-group">
+            <input type="text" ng-model="name" placeholder="Enter your name" class="form-control">
+        </div>
+        <div class="form-group">
+            <input type="text" ng-model="gameId" placeholder="Game ID" class="form-control" ng-if="choice!='NEW'">
+        </div>
+        <div class="space-around">
+            <input type="submit" value="Submit" class="btn btn-lg btn-primary">
+            <a href="/#/" class="btn btn-lg btn-primary">Cancel</a>
+        </div>
     </form>
 </div>
