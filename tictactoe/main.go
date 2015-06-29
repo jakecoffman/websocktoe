@@ -74,16 +74,20 @@ func gameLoop(player *Player, game *Game) error {
 	}
 }
 
-func Loop(conn *websocket.Conn, pitboss *PitBoss) error {
-	player := NewPlayer(conn)
+func Loop(conn *websocket.Conn, id string, pitboss *PitBoss) error {
+	player, game := pitboss.RejoinOrNewPlayer(conn, id)
+	defer player.Disconnect()
+	var err error
 	for {
-		game, err := lobbyLoop(player, pitboss)
-		if err != nil {
-			return err
+		if game == nil {
+			game, err = lobbyLoop(player, pitboss)
+			if err != nil {
+				return err
+			}
 		}
+		game.Broadcast(fmt.Sprintf("Player %v has joined", player.Name))
 		defer func() {
-			game.Leave(player)
-			game.Broadcast(fmt.Sprintf("Player %v has left", player.Name))
+			game.Broadcast(fmt.Sprintf("Player %v has disconnected", player.Name))
 			game.Update()
 		}()
 

@@ -122,3 +122,10 @@ func (g *Game) Update() {
 		}
 	}
 }
+
+func (g *Game) Find(playerId string) *Player {
+	g.RLock()
+	defer g.RUnlock()
+	player, _ := g.Players[playerId]
+	return player
+}

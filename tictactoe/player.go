@@ -2,20 +2,20 @@ package tictactoe
 
 import (
 	"github.com/gorilla/websocket"
-	"github.com/jakecoffman/websocktoe/random"
 	"sync"
 )
 
 type Player struct {
-	r    sync.Mutex
-	w    sync.Mutex
-	id   string
-	Name string `json:"name"`
-	conn *websocket.Conn
+	r         sync.Mutex
+	w         sync.Mutex
+	id        string
+	Name      string `json:"name"`
+	conn      *websocket.Conn
+	Connected bool `json:"connected"`
 }
 
-func NewPlayer(conn *websocket.Conn) *Player {
-	return &Player{id: random.PlayerId(), Name: "", conn: conn}
+func NewPlayer(conn *websocket.Conn, id string) *Player {
+	return &Player{id: id, Name: "", conn: conn, Connected: true}
 }
 
 type PlayerMessage struct {
@@ -53,4 +53,13 @@ func (p *Player) WriteGame(game *Game) error {
 		Type string `json:"type"`
 		*Game
 	}{Type: "state", Game: game})
+}
+
+func (p *Player) Disconnect() {
+	p.w.Lock()
+	p.r.Lock()
+	defer p.w.Unlock()
+	defer p.r.Unlock()
+	p.conn = nil
+	p.Connected = false
 }

@@ -3,6 +3,7 @@ package tictactoe
 import (
 	"github.com/jakecoffman/websocktoe/random"
 	"sync"
+	"github.com/gorilla/websocket"
 )
 
 type PitBoss struct {
@@ -55,4 +56,15 @@ func (g *PitBoss) Find(gameId string) *Game {
 		return nil
 	}
 	return game
+}
+
+func (g *PitBoss) RejoinOrNewPlayer(conn *websocket.Conn, playerId string) (*Player, *Game) {
+	g.Lock()
+	defer g.Unlock()
+	for _, game := range g.games {
+		if player := game.Find(playerId); player != nil {
+			return player, game
+		}
+	}
+	return NewPlayer(conn, playerId), nil
 }
