@@ -11,7 +11,9 @@
     <script src="thirdparty/angular/angular-route.min.js"></script>
 </head>
 <body ng-app="game" ng-controller="RootCtrl">
-
+<div class="label label-danger" ng-if="!game.connected" style="position: absolute;">
+    Connecting...
+</div>
 <div ng-view></div>
 
 <ul>

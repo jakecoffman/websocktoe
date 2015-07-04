@@ -4,17 +4,6 @@
     body {
         height: 100%;
     }
-    #container {
-        height: 100%;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-    }
-    .messages {
-        display: flex;
-        height: 100px;
-    }
     .tictactoe {
         height: 300px;
         width: 300px;
@@ -61,37 +50,47 @@
         border-right: none;
     }
 </style>
-<div class="messages">
-    <p>{{message}}</p>
+<div class="container">
+    <div class="row">
+        <div class="col-xs-6">
+            Game ID: {{game.state.id}}
+        </div>
+        <div class="col-xs-6">
+            <div class="pull-right">
+                Players:
+                <ul>
+                    <li ng-repeat="p in game.state.players">{{p.name}}</li>
+                </ul>
+            </div>
+        </div>
+    </div>
 </div>
-<div class="messages">
-    Players:
-    <ul>
-        <li ng-repeat="p in game.state.players">{{p.name}}</li>
-    </ul>
-    Game ID: {{game.state.id}}
+<div class="center-row">
     <div ng-show="game.state.over">
         <p ng-show="game.state.winner">Winner is {{game.state.winner}}</p>
         <p ng-show="!game.state.winner">Stalemate!</p>
     </div>
 </div>
-<div class="tictactoe">
-    <div class="r">
-        <div class="cell" ng-click="move(0, 0)">{{board(0,0)}}</div>
-        <div class="cell" ng-click="move(1, 0)">{{board(1,0)}}</div>
-        <div class="cell" ng-click="move(2, 0)">{{board(2,0)}}</div>
-    </div>
-    <div class="r">
-        <div class="cell" ng-click="move(0, 1)">{{board(0,1)}}</div>
-        <div class="cell" ng-click="move(1, 1)">{{board(1,1)}}</div>
-        <div class="cell" ng-click="move(2, 1)">{{board(2,1)}}</div>
-    </div>
-    <div class="r">
-        <div class="cell" ng-click="move(0, 2)">{{board(0,2)}}</div>
-        <div class="cell" ng-click="move(1, 2)">{{board(1,2)}}</div>
-        <div class="cell" ng-click="move(2, 2)">{{board(2,2)}}</div>
+<div class="center-row">
+    <div class="tictactoe">
+        <div class="r">
+            <div class="cell" ng-click="move(0, 0)">{{board(0,0)}}</div>
+            <div class="cell" ng-click="move(1, 0)">{{board(1,0)}}</div>
+            <div class="cell" ng-click="move(2, 0)">{{board(2,0)}}</div>
+        </div>
+        <div class="r">
+            <div class="cell" ng-click="move(0, 1)">{{board(0,1)}}</div>
+            <div class="cell" ng-click="move(1, 1)">{{board(1,1)}}</div>
+            <div class="cell" ng-click="move(2, 1)">{{board(2,1)}}</div>
+        </div>
+        <div class="r">
+            <div class="cell" ng-click="move(0, 2)">{{board(0,2)}}</div>
+            <div class="cell" ng-click="move(1, 2)">{{board(1,2)}}</div>
+            <div class="cell" ng-click="move(2, 2)">{{board(2,2)}}</div>
+        </div>
     </div>
 </div>
-<div class="space-around">
+<hr/>
+<div class="center-row">
     <button ng-click="leave()" class="btn btn-primary btn-lg">Leave game</button>
 </div>

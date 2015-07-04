@@ -12,27 +12,37 @@ angular.module('game', [
         $location.path("/");
     }])
     .factory('Game', ['$rootScope', '$location', function ($rootScope, $location) {
-        var ws = new WebSocket('ws://' + $location.host() + ':' + $location.port() + '/ws');
+        var url = 'ws://' + $location.host() + ':' + $location.port() + '/ws';
+        var ws;
+        reconnect();
 
-        var Game = {messages: [], state: {}};
+        var Game = {messages: [], state: {}, connected: false};
 
         Game.send = function (data) {
             ws.send(JSON.stringify(data));
         };
 
-        ws.onopen = function (e) {
+        function onopen(e) {
             $rootScope.$apply(function () {
-                Game.messages.unshift("Connected");
+                Game.connected = true;
             });
-        };
+        }
 
-        ws.onclose = function (e) {
+        function onclose(e) {
             $rootScope.$apply(function () {
-                Game.messages.unshift("Disconnected");
+                Game.connected = false;
+                reconnect();
             });
-        };
+        }
 
-        ws.onmessage = function (e) {
+        function reconnect() {
+            ws = new WebSocket(url);
+            ws.onclose = onclose;
+            ws.onmessage = onmessage;
+            ws.onopen = onopen;
+        }
+
+        function onmessage(e) {
             $rootScope.$apply(function () {
                 var data = JSON.parse(e.data);
                 console.log(data);
@@ -48,7 +58,7 @@ angular.module('game', [
                         console.log("Unknown message type", data.type);
                 }
             });
-        };
+        }
 
         return Game;
     }])

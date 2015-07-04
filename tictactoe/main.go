@@ -3,6 +3,7 @@ package tictactoe
 import (
 	"fmt"
 	"github.com/gorilla/websocket"
+	"log"
 )
 
 const (
@@ -18,9 +19,10 @@ func lobbyLoop(player *Player, pitboss *PitBoss) (*Game, error) {
 			return nil, err
 		}
 		if !lobbyCmd.Valid() {
-			if err = player.Say("Invalid command"); err != nil {
+			if err = player.Say("Invalid lobby command"); err != nil {
 				return nil, err
 			}
+			log.Println(lobbyCmd)
 			continue
 		}
 
@@ -82,8 +84,11 @@ func Loop(conn *websocket.Conn, id string, pitboss *PitBoss) error {
 		if game == nil {
 			game, err = lobbyLoop(player, pitboss)
 			if err != nil {
+				log.Println(err)
 				return err
 			}
+		} else {
+			log.Printf("Player %v rejoining", player.Name)
 		}
 		game.Broadcast(fmt.Sprintf("Player %v has joined", player.Name))
 		defer func() {
@@ -94,10 +99,12 @@ func Loop(conn *websocket.Conn, id string, pitboss *PitBoss) error {
 		game.Update()
 		err = gameLoop(player, game)
 		if err != nil {
+			log.Println(err)
 			return err
 		}
 		game.Leave(player)
 		game.Broadcast(fmt.Sprintf("Player %v has left", player.Name))
 		game.Update()
+		game = nil
 	}
 }

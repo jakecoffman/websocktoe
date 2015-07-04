@@ -63,6 +63,8 @@ func (g *PitBoss) RejoinOrNewPlayer(conn *websocket.Conn, playerId string) (*Pla
 	defer g.Unlock()
 	for _, game := range g.games {
 		if player := game.Find(playerId); player != nil {
+			player.conn = conn
+			player.Connected = true
 			return player, game
 		}
 	}
