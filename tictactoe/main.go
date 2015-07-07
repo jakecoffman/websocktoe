@@ -2,8 +2,10 @@ package tictactoe
 
 import (
 	"fmt"
-	"github.com/gorilla/websocket"
 	"log"
+
+	"github.com/gorilla/websocket"
+	"github.com/jakecoffman/websocktoe/lib"
 )
 
 const (
@@ -11,28 +13,29 @@ const (
 	LOBBY_JOIN = "JOIN"
 )
 
-func lobbyLoop(player *Player, pitboss *PitBoss) (*Game, error) {
+func lobbyLoop(player *lib.Player, pitboss *PitBoss) (*Game, error) {
 	var game *Game
 	for {
-		lobbyCmd, err := player.ReadLobbyCmd()
+		cmd := &LobbyCmd{}
+		err := player.Read(cmd)
 		if err != nil {
 			return nil, err
 		}
-		if !lobbyCmd.Valid() {
+		if !cmd.Valid() {
 			if err = player.Say("Invalid lobby command"); err != nil {
 				return nil, err
 			}
-			log.Println(lobbyCmd)
+			log.Println(cmd)
 			continue
 		}
 
-		player.Name = lobbyCmd.Name
+		player.Name = cmd.Name
 
-		switch lobbyCmd.Action {
+		switch cmd.Action {
 		case LOBBY_NEW:
 			game = pitboss.NewGame(player)
 		case LOBBY_JOIN:
-			game = pitboss.Find(lobbyCmd.GameId)
+			game = pitboss.Find(cmd.GameId)
 			if game == nil {
 				player.Say("Game not found")
 				continue
@@ -43,31 +46,32 @@ func lobbyLoop(player *Player, pitboss *PitBoss) (*Game, error) {
 				continue
 			}
 		default:
-			player.Say(fmt.Sprintln("Unknown action, programmer error?", lobbyCmd.Action))
+			player.Say(fmt.Sprintln("Unknown action, programmer error?", cmd.Action))
 			continue
 		}
 		return game, nil
 	}
 }
 
-func gameLoop(player *Player, game *Game) error {
+func gameLoop(player *lib.Player, game *Game) error {
 	for {
-		gameCmd, err := player.ReadGameCmd()
+		cmd := &GameCmd{}
+		err := player.Read(cmd)
 		if err != nil {
 			return err
 		}
-		if !gameCmd.Valid() {
-			player.Say(fmt.Sprintf("Invalid command", gameCmd))
+		if !cmd.Valid() {
+			player.Say(fmt.Sprintf("Invalid command", cmd))
 			continue
 		}
-		if gameCmd.Leave {
+		if cmd.Leave {
 			return nil
 		}
 		if game.Over {
 			player.Say("Game is over")
 			continue
 		}
-		if !game.Move(player, gameCmd.X, gameCmd.Y) {
+		if !game.Move(player, cmd.X, cmd.Y) {
 			player.Say("Invalid move")
 			continue
 		}

@@ -1,9 +1,9 @@
-package tictactoe
+package lib
 
 import (
+	"errors"
 	"github.com/gorilla/websocket"
 	"sync"
-	"errors"
 )
 
 type Player struct {
@@ -24,6 +24,15 @@ type PlayerMessage struct {
 	Message string `json:"message"`
 }
 
+func (p *Player) Id() string {
+	return p.id
+}
+
+func (p *Player) Rejoin(conn *websocket.Conn) {
+	p.conn = conn
+	p.Connected = true
+}
+
 func (p *Player) Say(message string) error {
 	p.w.Lock()
 	defer p.w.Unlock()
@@ -34,38 +43,22 @@ func (p *Player) Say(message string) error {
 	return err
 }
 
-func (p *Player) ReadLobbyCmd() (*LobbyCmd, error) {
+func (p *Player) Read(data interface{}) error {
 	p.r.Lock()
 	defer p.r.Unlock()
 	if !p.Connected {
-		return nil, errors.New("Player disconnected")
+		return errors.New("Player disconnected before read")
 	}
-	lobbyCmd := &LobbyCmd{}
-	err := p.conn.ReadJSON(lobbyCmd)
-	return lobbyCmd, err
+	return p.conn.ReadJSON(data)
 }
 
-func (p *Player) ReadGameCmd() (*GameCmd, error) {
-	p.r.Lock()
-	defer p.r.Unlock()
-	if !p.Connected {
-		return nil, errors.New("Player disconnected")
-	}
-	gameCmd := &GameCmd{}
-	err := p.conn.ReadJSON(gameCmd)
-	return gameCmd, err
-}
-
-func (p *Player) WriteGame(game *Game) error {
+func (p *Player) Write(data interface{}) error {
 	p.w.Lock()
 	defer p.w.Unlock()
 	if !p.Connected {
 		return errors.New("Player disconnected")
 	}
-	return p.conn.WriteJSON(struct {
-		Type string `json:"type"`
-		*Game
-	}{Type: "state", Game: game})
+	return p.conn.WriteJSON(data)
 }
 
 func (p *Player) Disconnect() {

@@ -1,9 +1,11 @@
 package tictactoe
 
 import (
-	"github.com/jakecoffman/websocktoe/random"
 	"sync"
+
 	"github.com/gorilla/websocket"
+	"github.com/jakecoffman/websocktoe/lib"
+	"github.com/jakecoffman/websocktoe/random"
 )
 
 type PitBoss struct {
@@ -16,13 +18,13 @@ func NewPitBoss() *PitBoss {
 }
 
 // NewGame initializes a new game from scratch
-func (g *PitBoss) NewGame(player *Player) *Game {
+func (g *PitBoss) NewGame(player *lib.Player) *Game {
 	g.Lock()
 	defer g.Unlock()
 	game := &Game{
 		Id:      random.GameId(),
 		View:    VIEW_PLAY,
-		Players: map[string]*Player{player.id: player},
+		Players: map[string]*lib.Player{player.Id(): player},
 		Board:   [3][3]string{},
 		Over:    false,
 	}
@@ -40,7 +42,7 @@ func (g *PitBoss) Get(id string) (*Game, bool) {
 	return game, ok
 }
 
-func (g *PitBoss) Disconnect(player *Player) {
+func (g *PitBoss) Disconnect(player *lib.Player) {
 	g.RLock()
 	defer g.RUnlock()
 	for _, game := range g.games {
@@ -58,15 +60,14 @@ func (g *PitBoss) Find(gameId string) *Game {
 	return game
 }
 
-func (g *PitBoss) RejoinOrNewPlayer(conn *websocket.Conn, playerId string) (*Player, *Game) {
+func (g *PitBoss) RejoinOrNewPlayer(conn *websocket.Conn, playerId string) (*lib.Player, *Game) {
 	g.Lock()
 	defer g.Unlock()
 	for _, game := range g.games {
 		if player := game.Find(playerId); player != nil {
-			player.conn = conn
-			player.Connected = true
+			player.Rejoin(conn)
 			return player, game
 		}
 	}
-	return NewPlayer(conn, playerId), nil
+	return lib.NewPlayer(conn, playerId), nil
 }

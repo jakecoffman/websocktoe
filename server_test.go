@@ -1,92 +1,106 @@
 package websocktoe
 
 import (
-	"testing"
 	"github.com/gorilla/websocket"
-	"net/http/httptest"
-	"net/url"
+	"log"
 	"net"
 	"net/http"
-	"log"
+	"net/http/httptest"
+	"net/url"
 	"reflect"
+	"testing"
 )
 
+type M map[string]interface{}
+
 func TestServer(t *testing.T) {
+	// setup test server
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 	server := httptest.NewServer(NewServer())
 	defer server.Close()
 
-	u, _ := url.Parse(server.URL)
-	c1, err := net.Dial("tcp", u.Host)
+	url, _ := url.Parse(server.URL)
+	url.Path += "/ws"
+
+	// make first connection
+	c1, err := net.Dial("tcp", url.Host)
 	if err != nil {
 		t.Fatalf("Dial: %v", err)
 	}
-	u.Path += "/ws"
 
-	// http response ignored
-	ws1, _, err := websocket.NewClient(c1, u, http.Header{"Origin": {server.URL}}, 1024, 1024)
+	// prebake cookies and headers
+	cookie1 := http.Cookie{Name: "ID", Value: "one"}
+	cookie2 := http.Cookie{Name: "ID", Value: "two"}
+	header1 := http.Header{"Origin": {server.URL}, "Cookie": {cookie1.String()}}
+	header2 := http.Header{"Origin": {server.URL}, "Cookie": {cookie2.String()}}
+
+	// create websocket connection (http response ignored)
+	ws1, _, err := websocket.NewClient(c1, url, header1, 1024, 1024)
 	if err != nil {
 		t.Fatalf("NewClient: %v", err)
 	}
 	defer ws1.Close()
 
-	type M map[string]interface{}
-
+	// write "new game" message to server
 	err = ws1.WriteJSON(M{"name": "alice", "action": "NEW"})
 	if err != nil {
 		t.Fatal(err)
 	}
 
+	// read server response to new game
 	gameState := M{}
 	err = ws1.ReadJSON(&gameState)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	c2, err := net.Dial("tcp", u.Host)
+	// create second connection to server and connect
+	c2, err := net.Dial("tcp", url.Host)
 	if err != nil {
 		t.Fatalf("Dial: %v", err)
 	}
-	ws2, _, err := websocket.NewClient(c2, u, http.Header{"Origin": {server.URL}}, 1024, 1024)
+	ws2, _, err := websocket.NewClient(c2, url, header2, 1024, 1024)
 	if err != nil {
 		t.Fatalf("NewClient: %v", err)
 	}
 	defer ws2.Close()
 
+	// join the game created by first connection
 	err = ws2.WriteJSON(M{"name": "bob", "action": "JOIN", "gameId": gameState["id"]})
 	if err != nil {
 		t.Fatal(err)
 	}
 
+	// read both responses
 	gameState = M{}
 	err = ws1.ReadJSON(&gameState)
 	if err != nil {
 		t.Fatal(err)
 	}
-
 	gameState2 := M{}
 	err = ws2.ReadJSON(&gameState2)
 	if err != nil {
 		t.Fatal(err)
 	}
 
+	// check both responses are the same
 	if !reflect.DeepEqual(gameState, gameState2) {
-		t.Fatal("Game states not equal")
+		t.Fatalf("Game states not equal: %#v %#v", gameState, gameState2)
 	}
 
-//	out := M{"hello": "world"}
-//	err = ws1.WriteJSON(out)
-//	if err != nil {
-//		t.Fatal(err)
-//	}
-//
-//	msg := M{}
-//	err = ws2.ReadJSON(&msg)
-//	if err != nil {
-//		t.Fatal(err)
-//	}
-//
-//	if !reflect.DeepEqual(msg, gameState) {
-//		t.Fatalf("%#v != %#v", msg, gameState)
-//	}
+	//	out := M{"hello": "world"}
+	//	err = ws1.WriteJSON(out)
+	//	if err != nil {
+	//		t.Fatal(err)
+	//	}
+	//
+	//	msg := M{}
+	//	err = ws2.ReadJSON(&msg)
+	//	if err != nil {
+	//		t.Fatal(err)
+	//	}
+	//
+	//	if !reflect.DeepEqual(msg, gameState) {
+	//		t.Fatalf("%#v != %#v", msg, gameState)
+	//	}
 }

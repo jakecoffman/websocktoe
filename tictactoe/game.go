@@ -3,6 +3,8 @@ package tictactoe
 import (
 	"log"
 	"sync"
+
+	"github.com/jakecoffman/websocktoe/lib"
 )
 
 const (
@@ -12,21 +14,21 @@ const (
 
 type Game struct {
 	sync.RWMutex
-	Id       string             `json:"id"`
-	View     string             `json:"view"`
-	Players  map[string]*Player `json:"players"`
-	Board    [3][3]string       `json:"board"`
-	LastMove string             `json:"lastmove"` // name of the player that made the last move
-	Winner   string             `json:"winner"`
-	Over     bool               `json:"over"`
-	Moves    int                `json:"moves"`
+	Id       string                 `json:"id"`
+	View     string                 `json:"view"`
+	Players  map[string]*lib.Player `json:"players"`
+	Board    [3][3]string           `json:"board"`
+	LastMove string                 `json:"lastmove"` // name of the player that made the last move
+	Winner   string                 `json:"winner"`
+	Over     bool                   `json:"over"`
+	Moves    int                    `json:"moves"`
 }
 
-func (g *Game) Join(player *Player) bool {
+func (g *Game) Join(player *lib.Player) bool {
 	g.Lock()
 	defer g.Unlock()
 	if len(g.Players) < 2 {
-		g.Players[player.id] = player
+		g.Players[player.Id()] = player
 
 		if len(g.Players) == 2 {
 			g.View = VIEW_PLAY
@@ -36,10 +38,10 @@ func (g *Game) Join(player *Player) bool {
 	return false
 }
 
-func (g *Game) Leave(player *Player) {
+func (g *Game) Leave(player *lib.Player) {
 	g.Lock()
 	defer g.Unlock()
-	delete(g.Players, player.id)
+	delete(g.Players, player.Id())
 }
 
 func (g *Game) Broadcast(message string) {
@@ -50,7 +52,7 @@ func (g *Game) Broadcast(message string) {
 	}
 }
 
-func (g *Game) Move(player *Player, x, y int) bool {
+func (g *Game) Move(player *lib.Player, x, y int) bool {
 	g.Lock()
 	defer g.Unlock()
 
@@ -116,14 +118,18 @@ func (g *Game) Update() {
 	g.RLock()
 	defer g.RUnlock()
 	for _, player := range g.Players {
-		err := player.WriteGame(g)
+		game := struct {
+			Type string `json:"type"`
+			*Game
+		}{Type: "state", Game: g}
+		err := player.Write(game)
 		if err != nil {
 			log.Println(err)
 		}
 	}
 }
 
-func (g *Game) Find(playerId string) *Player {
+func (g *Game) Find(playerId string) *lib.Player {
 	g.RLock()
 	defer g.RUnlock()
 	player, _ := g.Players[playerId]
