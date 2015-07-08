@@ -94,3 +94,6 @@
 <div class="center-row">
     <button ng-click="leave()" class="btn btn-primary btn-lg">Leave game</button>
 </div>
+<ul>
+    <li ng-repeat="m in game.state.messages track by $index">{{m}}</li>
+</ul>

@@ -1,5 +1,10 @@
 package tictactoe
 
+const (
+	LOBBY_NEW  = "NEW"
+	LOBBY_JOIN = "JOIN"
+)
+
 type LobbyCmd struct {
 	Name   string `json:"name"`
 	Action string `json:"action"`
@@ -20,8 +25,8 @@ func (cmd *LobbyCmd) Valid() bool {
 }
 
 type GameCmd struct {
-	X     int `json:"x"`
-	Y     int `json:"y"`
+	X     int  `json:"x"`
+	Y     int  `json:"y"`
 	Leave bool `json:"leave"`
 }
 

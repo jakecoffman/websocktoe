@@ -69,6 +69,6 @@ func HandlerTicTacToe(games *tictactoe.PitBoss, conns *Connections) http.Handler
 		}()
 		conns.Add(conn)
 		log.Println("Connections", conns.Size())
-		log.Println(tictactoe.Loop(conn, cookie.Value, games))
+		log.Println(TicTacToe(conn, cookie.Value, games))
 	}
 }

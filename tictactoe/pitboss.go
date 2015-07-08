@@ -22,16 +22,16 @@ func (g *PitBoss) NewGame(player *lib.Player) *Game {
 	g.Lock()
 	defer g.Unlock()
 	game := &Game{
-		Id:      random.GameId(),
-		View:    VIEW_PLAY,
-		Players: map[string]*lib.Player{player.Id(): player},
-		Board:   [3][3]string{},
-		Over:    false,
+		id:      random.GameId(),
+		view:    VIEW_PLAY,
+		players: map[string]*lib.Player{player.Id(): player},
+		board:   [3][3]string{},
+		over:    false,
 	}
-	game.Board[0] = [3]string{}
-	game.Board[1] = [3]string{}
-	game.Board[2] = [3]string{}
-	g.games[game.Id] = game
+	game.board[0] = [3]string{}
+	game.board[1] = [3]string{}
+	game.board[2] = [3]string{}
+	g.games[game.id] = game
 	return game
 }
 

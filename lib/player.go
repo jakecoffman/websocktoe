@@ -2,8 +2,9 @@ package lib
 
 import (
 	"errors"
-	"github.com/gorilla/websocket"
 	"sync"
+
+	"github.com/gorilla/websocket"
 )
 
 type Player struct {
@@ -29,6 +30,10 @@ func (p *Player) Id() string {
 }
 
 func (p *Player) Rejoin(conn *websocket.Conn) {
+	p.r.Lock()
+	p.w.Lock()
+	defer p.r.Unlock()
+	defer p.w.Unlock()
 	p.conn = conn
 	p.Connected = true
 }

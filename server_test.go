@@ -1,19 +1,29 @@
 package websocktoe
 
 import (
-	"github.com/gorilla/websocket"
 	"log"
 	"net"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"os"
 	"reflect"
+	"runtime/pprof"
 	"testing"
+	"time"
+
+	"github.com/gorilla/websocket"
 )
 
 type M map[string]interface{}
 
 func TestServer(t *testing.T) {
+	go func() {
+		time.Sleep(5 * time.Second)
+		pprof.Lookup("goroutine").WriteTo(os.Stdout, 1)
+		log.Fatal("Test took too long")
+	}()
+
 	// setup test server
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 	server := httptest.NewServer(NewServer())
@@ -85,7 +95,7 @@ func TestServer(t *testing.T) {
 
 	// check both responses are the same
 	if !reflect.DeepEqual(gameState, gameState2) {
-		t.Fatalf("Game states not equal: %#v %#v", gameState, gameState2)
+		t.Fatalf("Game states not equal: \n%#v \n%#v", gameState, gameState2)
 	}
 
 	//	out := M{"hello": "world"}

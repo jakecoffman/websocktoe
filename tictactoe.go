@@ -1,4 +1,4 @@
-package tictactoe
+package websocktoe
 
 import (
 	"fmt"
@@ -6,17 +6,13 @@ import (
 
 	"github.com/gorilla/websocket"
 	"github.com/jakecoffman/websocktoe/lib"
+	"github.com/jakecoffman/websocktoe/tictactoe"
 )
 
-const (
-	LOBBY_NEW  = "NEW"
-	LOBBY_JOIN = "JOIN"
-)
-
-func lobbyLoop(player *lib.Player, pitboss *PitBoss) (*Game, error) {
-	var game *Game
+func lobbyLoop(player *lib.Player, pitboss *tictactoe.PitBoss) (*tictactoe.Game, error) {
+	var game *tictactoe.Game
 	for {
-		cmd := &LobbyCmd{}
+		cmd := &tictactoe.LobbyCmd{}
 		err := player.Read(cmd)
 		if err != nil {
 			return nil, err
@@ -32,9 +28,9 @@ func lobbyLoop(player *lib.Player, pitboss *PitBoss) (*Game, error) {
 		player.Name = cmd.Name
 
 		switch cmd.Action {
-		case LOBBY_NEW:
+		case tictactoe.LOBBY_NEW:
 			game = pitboss.NewGame(player)
-		case LOBBY_JOIN:
+		case tictactoe.LOBBY_JOIN:
 			game = pitboss.Find(cmd.GameId)
 			if game == nil {
 				player.Say("Game not found")
@@ -53,9 +49,9 @@ func lobbyLoop(player *lib.Player, pitboss *PitBoss) (*Game, error) {
 	}
 }
 
-func gameLoop(player *lib.Player, game *Game) error {
+func gameLoop(player *lib.Player, game *tictactoe.Game) error {
 	for {
-		cmd := &GameCmd{}
+		cmd := &tictactoe.GameCmd{}
 		err := player.Read(cmd)
 		if err != nil {
 			return err
@@ -67,7 +63,7 @@ func gameLoop(player *lib.Player, game *Game) error {
 		if cmd.Leave {
 			return nil
 		}
-		if game.Over {
+		if game.Over() {
 			player.Say("Game is over")
 			continue
 		}
@@ -80,7 +76,7 @@ func gameLoop(player *lib.Player, game *Game) error {
 	}
 }
 
-func Loop(conn *websocket.Conn, id string, pitboss *PitBoss) error {
+func TicTacToe(conn *websocket.Conn, id string, pitboss *tictactoe.PitBoss) error {
 	player, game := pitboss.RejoinOrNewPlayer(conn, id)
 	defer player.Disconnect()
 	var err error
@@ -94,12 +90,11 @@ func Loop(conn *websocket.Conn, id string, pitboss *PitBoss) error {
 		} else {
 			log.Printf("Player %v rejoining", player.Name)
 		}
-		game.Broadcast(fmt.Sprintf("Player %v has joined", player.Name))
 		defer func() {
-			game.Broadcast(fmt.Sprintf("Player %v has disconnected", player.Name))
+			game.Broadcast("Player %v has disconnected", player.Name)
 			game.Update()
 		}()
-
+		game.Broadcast("Player %v has joined", player.Name)
 		game.Update()
 		err = gameLoop(player, game)
 		if err != nil {
