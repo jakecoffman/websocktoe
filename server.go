@@ -6,7 +6,8 @@ import (
 	"net/http/pprof"
 
 	"github.com/gorilla/websocket"
-	"github.com/jakecoffman/websocktoe/tictactoe"
+	"github.com/jakecoffman/websocktoe/lib"
+	"github.com/jakecoffman/websocktoe/lobby"
 	"github.com/nu7hatch/gouuid"
 )
 
@@ -20,10 +21,10 @@ func NewServer() *http.ServeMux {
 
 	mux.Handle("/", AddSession(http.FileServer(http.Dir("static"))))
 
-	games := tictactoe.NewPitBoss()
+	games := lib.NewPitBoss()
 	connections := NewConnections()
 
-	mux.HandleFunc("/ws", HandlerTicTacToe(games, connections))
+	mux.HandleFunc("/ws", WsHandler(games, connections))
 	return mux
 }
 
@@ -45,7 +46,7 @@ func AddSession(handler http.Handler) http.HandlerFunc {
 	}
 }
 
-func HandlerTicTacToe(games *tictactoe.PitBoss, conns *Connections) http.HandlerFunc {
+func WsHandler(pitboss *lib.PitBoss, conns *Connections) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		cookie, err := r.Cookie("ID")
 		if err != nil || cookie == nil || cookie.Value == "" {
@@ -69,6 +70,21 @@ func HandlerTicTacToe(games *tictactoe.PitBoss, conns *Connections) http.Handler
 		}()
 		conns.Add(conn)
 		log.Println("Connections", conns.Size())
-		log.Println(TicTacToe(conn, cookie.Value, games))
+		player, game := pitboss.RejoinOrNewPlayer(conn, cookie.Value)
+		defer func() {
+			if game != nil {
+				game.Broadcast("Player %v has disconnected", player.Name)
+				game.Update()
+			}
+			player.Disconnect()
+		}()
+		if game == nil {
+			game, err = lobby.Loop(player, pitboss)
+			if err != nil {
+				log.Println(err)
+				return
+			}
+		}
+		log.Println(game.Play(player, pitboss))
 	}
 }

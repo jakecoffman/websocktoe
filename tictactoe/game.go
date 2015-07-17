@@ -8,6 +8,7 @@ import (
 	"sync"
 
 	"github.com/jakecoffman/websocktoe/lib"
+	"github.com/jakecoffman/websocktoe/random"
 )
 
 const (
@@ -15,7 +16,7 @@ const (
 	VIEW_PLAY  = "PLAY"
 )
 
-type Game struct {
+type TicTacToe struct {
 	sync.RWMutex
 	id       string
 	view     string
@@ -28,26 +29,33 @@ type Game struct {
 	messages []string
 }
 
-type jsonGame struct {
-	Type     string                 `json:"type"`
-	Id       string                 `json:"id"`
-	View     string                 `json:"view"`
-	Players  map[string]*lib.Player `json:"players"`
-	Board    [3][3]string           `json:"board"`
-	LastMove string                 `json:"lastmove"`
-	Winner   string                 `json:"winner"`
-	Over     bool                   `json:"over"`
-	Moves    int                    `json:"moves"`
-	Messages []string               `json:"messages"`
+func NewTicTacToe(player *lib.Player) *TicTacToe {
+	game := &TicTacToe{
+		id:      random.GameId(),
+		view:    VIEW_PLAY,
+		players: map[string]*lib.Player{player.Id(): player},
+		board:   [3][3]string{},
+		over:    false,
+	}
+	game.board[0] = [3]string{}
+	game.board[1] = [3]string{}
+	game.board[2] = [3]string{}
+	return game
 }
 
-func (g *Game) Over() bool {
+func (g *TicTacToe) Id() string {
+	g.RLock()
+	defer g.RUnlock()
+	return g.id
+}
+
+func (g *TicTacToe) Over() bool {
 	g.RLock()
 	defer g.RUnlock()
 	return g.over
 }
 
-func (g *Game) Join(player *lib.Player) bool {
+func (g *TicTacToe) Join(player *lib.Player) bool {
 	g.Lock()
 	defer g.Unlock()
 	if len(g.players) < 2 {
@@ -61,19 +69,19 @@ func (g *Game) Join(player *lib.Player) bool {
 	return false
 }
 
-func (g *Game) Leave(player *lib.Player) {
+func (g *TicTacToe) Leave(player *lib.Player) {
 	g.Lock()
 	defer g.Unlock()
 	delete(g.players, player.Id())
 }
 
-func (g *Game) Broadcast(message string, a ...interface{}) {
+func (g *TicTacToe) Broadcast(message string, a ...interface{}) {
 	g.Lock()
 	defer g.Unlock()
 	g.messages = append([]string{fmt.Sprintf(message, a...)}, g.messages...)
 }
 
-func (g *Game) Move(player *lib.Player, x, y int) bool {
+func (g *TicTacToe) Move(player *lib.Player, x, y int) bool {
 	g.Lock()
 	defer g.Unlock()
 
@@ -95,47 +103,7 @@ func (g *Game) Move(player *lib.Player, x, y int) bool {
 	return true
 }
 
-func winner(board [3][3]string, x, y int, name string) string {
-	for i := 0; i < 3; i++ {
-		if board[x][i] != name {
-			break
-		}
-		if i == 2 {
-			return name
-		}
-	}
-
-	for i := 0; i < 3; i++ {
-		if board[i][y] != name {
-			break
-		}
-		if i == 2 {
-			return name
-		}
-	}
-
-	for i := 0; i < 3; i++ {
-		if board[i][i] != name {
-			break
-		}
-		if i == 2 {
-			return name
-		}
-	}
-
-	for i := 0; i < 3; i++ {
-		if board[i][2-i] != name {
-			break
-		}
-		if i == 2 {
-			return name
-		}
-	}
-
-	return ""
-}
-
-func (g *Game) Update() {
+func (g *TicTacToe) Update() {
 	g.RLock()
 	defer g.RUnlock()
 	for _, player := range g.players {
@@ -146,7 +114,7 @@ func (g *Game) Update() {
 	}
 }
 
-func (g *Game) Find(playerId string) *lib.Player {
+func (g *TicTacToe) Find(playerId string) *lib.Player {
 	g.RLock()
 	defer g.RUnlock()
 	player, _ := g.players[playerId]
@@ -154,10 +122,21 @@ func (g *Game) Find(playerId string) *lib.Player {
 }
 
 // MarshalJSON satisfies json.Marshaler interface
-func (g *Game) MarshalJSON() ([]byte, error) {
+func (g *TicTacToe) MarshalJSON() ([]byte, error) {
 	g.RLock()
 	defer g.RUnlock()
-	return json.Marshal(jsonGame{
+	return json.Marshal(struct {
+		Type     string                 `json:"type"`
+		Id       string                 `json:"id"`
+		View     string                 `json:"view"`
+		Players  map[string]*lib.Player `json:"players"`
+		Board    [3][3]string           `json:"board"`
+		LastMove string                 `json:"lastmove"`
+		Winner   string                 `json:"winner"`
+		Over     bool                   `json:"over"`
+		Moves    int                    `json:"moves"`
+		Messages []string               `json:"messages"`
+	}{
 		"state",
 		g.id,
 		g.view,
@@ -172,7 +151,7 @@ func (g *Game) MarshalJSON() ([]byte, error) {
 }
 
 // UnmarshalJSON satisfies json.Unmarshaler interface
-func (g *Game) UnmarshalJSON(data []byte) error {
+func (g *TicTacToe) UnmarshalJSON(data []byte) error {
 	g.Lock()
 	defer g.Unlock()
 	return errors.New("We shant need this yet")

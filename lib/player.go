@@ -4,6 +4,7 @@ import (
 	"errors"
 	"sync"
 
+	"fmt"
 	"github.com/gorilla/websocket"
 )
 
@@ -38,13 +39,13 @@ func (p *Player) Rejoin(conn *websocket.Conn) {
 	p.Connected = true
 }
 
-func (p *Player) Say(message string) error {
+func (p *Player) Say(message string, a ...interface{}) error {
 	p.w.Lock()
 	defer p.w.Unlock()
 	if !p.Connected {
 		return errors.New("Player disconnected")
 	}
-	err := p.conn.WriteJSON(PlayerMessage{"message", message})
+	err := p.conn.WriteJSON(PlayerMessage{"message", fmt.Sprintf(message, a...)})
 	return err
 }
 
